@@ -1,0 +1,371 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AI Article Generator</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f2f4f8;
+            color: #222;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 60px auto;
+            padding: 35px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            text-align: center;
+            color: #5535c9;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 35px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 10px;
+            margin-top: 20px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        button {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 8px;
+            background: #6345d9;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #4930b5;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        #generate {
+            width: 100%;
+            margin-top: 25px;
+        }
+
+        #status {
+            text-align: center;
+            margin-top: 20px;
+            color: #5535c9;
+            line-height: 1.5;
+        }
+
+        #articleSection {
+            display: none;
+            margin-top: 30px;
+        }
+
+        #output {
+            padding: 25px;
+            background: #fafafa;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        .article-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 20px;
+                padding: 20px;
+            }
+
+            .article-heading {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>AI Article Generator</h1>
+
+        <p class="subtitle">
+            Generate informative articles of approximately
+            500 words using Artificial Intelligence.
+        </p>
+
+        <form id="articleForm">
+
+            <!-- Article Topic -->
+
+            <label for="topic">Enter Your Article Topic</label>
+
+            <input
+                type="text"
+                id="topic"
+                placeholder="Example: Future of Artificial Intelligence"
+                required
+            >
+
+            <!-- Language Selection -->
+
+            
+<label for="language">Choose Language</label>
+
+<select id="language" required>
+
+    <option value="English (US)">English (US)</option>
+
+    <option value="English (UK)">English (UK)</option>
+
+    <option value="English (India)">English (India)</option>
+
+    <option value="English (Australia)">English (Australia)</option>
+
+    <option value="English (Canada)">English (Canada)</option>
+
+    <option value="Hindi">Hindi (हिन्दी)</option>
+
+    <option value="French">French</option>
+
+    <option value="Spanish">Spanish</option>
+
+    <option value="German">German</option>
+
+    <option value="Japanese">Japanese</option>
+
+    <option value="Chinese">Chinese</option>
+
+    <option value="Arabic">Arabic</option>
+
+</select>
+
+
+            <!-- Generate Button -->
+
+            <button type="submit" id="generate">
+                Generate Article
+            </button>
+
+        </form>
+
+        <!-- Status Message -->
+
+        <p id="status" role="status" aria-live="polite"></p>
+
+        <!-- Generated Article -->
+
+        <div id="articleSection">
+
+            <div class="article-heading">
+
+                <h2>Generated Article</h2>
+
+                <button type="button" id="copy">
+                    Copy Article
+                </button>
+
+            </div>
+
+            <div id="output"></div>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        
+
+        const WEBHOOK_URL = "https://hook.eu1.make.com/8bemoxqips5o7hbrdmwnvyintk33y3sj";
+
+
+        // HTML Elements
+
+        const form = document.getElementById("articleForm");
+
+        const topicInput = document.getElementById("topic");
+
+        const languageInput = document.getElementById("language");
+
+        const generateButton = document.getElementById("generate");
+
+        const statusText = document.getElementById("status");
+
+        const output = document.getElementById("output");
+
+        const articleSection = document.getElementById("articleSection");
+
+
+        // Generate Article
+
+        form.addEventListener("submit", async function(event) {
+
+            event.preventDefault();
+
+            const topic = topicInput.value.trim();
+
+            const language = languageInput.value;
+
+
+            if (!topic) {
+
+                statusText.textContent = "Please enter an article topic.";
+
+                return;
+
+            }
+
+
+            // Loading State
+
+            generateButton.disabled = true;
+
+            generateButton.textContent = "Generating...";
+
+            statusText.textContent =
+                "AI is writing your article. Please wait...";
+
+            articleSection.style.display = "none";
+
+
+            try {
+
+                // Send topic and language to Make.com
+
+                const requestURL =
+                    WEBHOOK_URL +
+                    "?topic=" + encodeURIComponent(topic) +
+                    "&language=" + encodeURIComponent(language);
+
+
+                const response = await fetch(requestURL);
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Request failed: " + response.status
+                    );
+
+                }
+
+
+                // Receive Generated Article
+
+                const article = await response.text();
+
+
+                if (!article.trim()) {
+
+                    throw new Error("No article was returned.");
+
+                }
+
+
+                // Display Article
+
+                output.textContent = article;
+
+                articleSection.style.display = "block";
+
+                statusText.textContent =
+                    "Article generated successfully!";
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                statusText.textContent =
+                    "Error: " + error.message;
+
+
+            } finally {
+
+                generateButton.disabled = false;
+
+                generateButton.textContent = "Generate Article";
+
+            }
+
+        });
+
+
+        // Copy Article
+
+        document.getElementById("copy").addEventListener(
+            "click",
+            async function() {
+
+                try {
+
+                    await navigator.clipboard.writeText(
+                        output.textContent
+                    );
+
+                    this.textContent = "Copied!";
+
+                } catch (error) {
+
+                    statusText.textContent =
+                        "Unable to copy the article.";
+
+                }
+
+            }
+        );
+
+    </script>
+
+</body>
+
+</html>
+
